@@ -1,0 +1,70 @@
+# TVStation · Docker Compose
+#
+# ── 飞牛 fnOS（直接用这个文件）─────────────────────────────────────────────
+#   1. Docker →「本地镜像」→ 导入发布包里的 tvstation-<版本号>-compiled-amd64.tar.gz
+#   2. Docker →「Compose」→「新增项目」
+#        项目名称：tvstation（只能用小写字母、数字、- 和 _，不能有点号）
+#        路径：在「我的文件」里新建一个文件夹，把这个 docker-compose.yml 放进去再选它
+#        勾上「创建项目后立即启动」
+#   3. 浏览器打开 http://NAS地址:8890
+#   ★ 以后改配置、升级都在 Compose 项目里改。在「容器」页面编辑会把内存盘（下面的 tmpfs）弄丢。
+#   ★ 更省事：飞牛用户可以直接装应用中心里的原生版，不用 Docker。
+#
+# ── 群晖 / 威联通 / Unraid / Portainer / 命令行 ──────────────────────────────
+#   见发布包里的「安装说明.md」。命令行：docker load -i <镜像包>，然后 docker compose up -d
+#
+# 只可能需要改一处：② 片库路径。
+#
+# ── 升级 ─────────────────────────────────────────────────────────────────
+#   导入新版本镜像包，把这个文件换成新版本的（或只改 image 和 container_name 里的版本号），
+#   在同一个 Compose 项目里重新构建。数据在 ./data 里，频道、媒体库、授权都会保留。
+#   ★ 别为新版本另建一个项目文件夹：./data 跟着项目文件夹走，新文件夹里是空的。
+services:
+  tvstation:
+    image: tvstation:2.2.48
+    # 镜像来自发布包（先导入），不去网上拉
+    pull_policy: never
+    container_name: tvstation-2.2.48
+    restart: unless-stopped
+
+    ports:
+      - "8890:8890"
+
+    volumes:
+      # ① 应用数据：数据库、台标、备份、授权。放在这个文件所在文件夹的 data 里，**升级时别删**。
+      - ./data:/data
+
+      # ② 你的片库，只读挂载（这个软件从不修改片源文件）。
+      #    左边是 NAS 上的路径，改成你自己的；右边以 /media 开头，在软件里添加片库时选它。
+      #    飞牛第一块存储空间是 /vol1。片子在别处就改左边，多个目录就多写几行，比如：
+      #      - /vol2/1000/电影:/media/电影:ro
+      - /vol1:/media/vol1:ro
+
+      # 时区跟着 NAS 走。不对的话在网页「系统设置 → 系统信息 → 时区」里改，不用动这里。
+      - /etc/localtime:/etc/localtime:ro
+
+      # ③ 保留这一行
+      - /etc/machine-id:/host/etc/machine-id:ro
+
+    # ④ 内存盘：播出切片放这里，**必需，别删**。
+    #    每路频道每隔几秒写一个切片，放在硬盘上会把固态写坏、把机械盘拖慢。
+    #    size 按频道数给：一路约 200MB，10 路给 2g。
+    tmpfs:
+      - /data/hls:size=2g,mode=1777
+
+    # ⑤ Intel 核显硬件转码 —— **默认关着，有核显再打开**。
+    #
+    #    ★ 开着而主机没有 /dev/dri 的话，容器**根本起不来**，报的是
+    #        error gathering device information while adding custom device "/dev/dri"
+    #      AMD 平台、云主机、老 NAS 都没有这个设备。所以默认关 ——
+    #      「默认能跑」比「默认最快」重要，何况「直接流」模式压根不用硬件转码。
+    #
+    #    有 Intel 核显、又要转码的话，去掉下面两行的 # 再重建容器。
+    # devices:
+    #   - /dev/dri:/dev/dri
+
+    entrypoint: ["/usr/local/bin/tvstation-entrypoint.sh"]
+
+    environment:
+      - PORT=8890
+      - APP_PORT=8890

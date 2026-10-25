@@ -1,0 +1,12 @@
+# 发布镜像包：480MB，超过 GitHub 单文件 100MB 限制，走发布页 / 购买页分发，不进 Git
+*.tar.gz
+
+# macOS 系统垃圾
+.DS_Store
+
+# 本地运行产生的数据（数据库、缓存、备份），绝不入库
+tvstation-2.2.48-docker/data/
+data/
+
+# WorkBuddy 项目内部数据，不公开
+.workbuddy/
