@@ -89,6 +89,21 @@ TVStation 就是这么一个软件。它把你 NAS 里的电影和剧集排成�
 
 ---
 
+## 下载
+
+发布包挂在本仓库的 **Releases** 里（网页右侧「Releases」栏目进入）：
+
+**[→ 前往 Releases 下载页](https://github.com/hahawsss/TVStation/releases)**
+
+| 发布包 | 用途 |
+|---|---|
+| `TVStation-2.2.48.fpk` | 飞牛 fnOS 原生版：应用中心手动安装，不用 Docker、不用任何配置 |
+| `tvstation-2.2.48-compiled-amd64.tar.gz` | Docker 镜像包：群晖 / 威联通 / Unraid / Portainer / 命令行 |
+
+下载后按下面的「安装」一节操作即可。
+
+---
+
 ## 安装
 
 | 你用的是 | 怎么装 |

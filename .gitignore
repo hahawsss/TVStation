@@ -1,5 +1,6 @@
-# 发布镜像包：480MB，超过 GitHub 单文件 100MB 限制，走发布页 / 购买页分发，不进 Git
+# 发布镜像包：超过 GitHub 单文件 100MB 限制，走 Releases 资产分发，不进 Git
 *.tar.gz
+*.fpk
 
 # macOS 系统垃圾
 .DS_Store
